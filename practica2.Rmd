@@ -8,9 +8,19 @@ output: html_document
 
 
 ##1. Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder? 
+
+El data set que hemos seleccionado, llamado "heart-disease-uci", o lo que es lo mismo, "enfermedades-corazon-uci", se refiere a pacientes.  Tenemos una lista de atributos con características de los pacientes, como son edad, sexo, colesterol en sangre, máximo ritmo cardíaco y otros indicadores médicos. La variable "target" indica si el paciente tiene enfermedad cardíaca o no y es la variable sobre la que querremos hacer predicciones.
+
+Hemos encontrado el data set interesante porque aunque los datos en el csv son numéricos ya vemos de un principio que hay datos categóricos. 
+
+Por otra parte, la variable "target" parece que nos va a permitir realizar estudios de diferente tipo como son: clasificación de pacientes, regresiones para predecir el valor, etc.
+
 ```{r}
 
 diseases<-read.csv("heart.csv", sep=",",na.strings = "NA")
+dim(diseases)
+str(diseases)
+summary(diseases)
 
 ```
 
@@ -28,6 +38,37 @@ diseases<-read.csv("heart.csv", sep=",",na.strings = "NA")
 
 ###4.2. Comprobación de la normalidad y homogeneidad de la varianza. 
 
+Vamos a probar la normlalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normlalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a comprender su distribución.
+
+```{r}
+
+trestbps<-diseases$trestbps
+chol<-diseases$chol
+thalach<-diseases$thalach
+oldpeak<-diseases$oldpeak
+
+
+#boxplot(trestbps ,chol,thalach,oldpeak,main="resting blood pressure",
+#        names = c("trestbps ","chol","thalach","oldpeak"),border = "brown",
+#        col = c("orange","red","green","grey") )
+
+
+hist(trestbps,ylab=names("trestbps"),col=heat.colors(8))
+hist(chol,ylab=names("chol"),col=heat.colors(8))
+hist(thalach,ylab=names("thalach"),col=heat.colors(8))
+hist(oldpeak,ylab=names("oldpeak"),col=heat.colors(8))
+
+
+
+shapiro.test(trestbps)
+shapiro.test(chol)
+shapiro.test(thalach)
+shapiro.test(oldpeak)
+
+
+```
+Como todos los valores del pvalue son muy pequeños podemos determinar que no tienen una distribución normal (se rechaza la hipótesis nula y por lo tanto asumimos que no hay normalidad en los datos).
+
 ###4.3. Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes. 
 
 ##5. Representación de los resultados a partir de tablas y gráficas. 
@@ -36,9 +77,14 @@ diseases<-read.csv("heart.csv", sep=",",na.strings = "NA")
 
 ##7. Código: Hay que adjuntar el código, preferiblemente en R, con el que se ha realizado la limpieza, análisis y representación de los datos. Si lo preferís, también podéis trabajar en Python.  
 
+##7. Referencias
+
+El Data Se seleccionado está disponible en :
+https://www.kaggle.com/ronitf/heart-disease-uci
+
 ```{r}
 
 
 ```
 
-Texto
+
