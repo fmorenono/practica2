@@ -26,9 +26,181 @@ summary(diseases)
 
 ##2. Integración y selección de los datos de interés a analizar. 
 
-##3. Limpieza de los datos. 
+A continuación se describirán el significado de cada una de las variables del data set:
+<ul>
+<li>age: edad en años.</li>
+<li>sex: 1 = masculino; 0 = femenino.</li>
+<li>cp: tipo de dolor de pecho.</li>
+<li>trestbps: presión arterial en reposo (en mm Hg al ingreso en el hospital).</li>
+<li>chol: suero colestoral en mg/dl.</li>
+<li>fbs: azúcar en la sangre en ayunas > 120 mg/dl (1 = verdadero; 0 = falso).</li>
+<li>restecg: resultados de electrocardiograma en reposo.</li>
+<li>thalach: maximo ritmo cardiaco alcanzado</li>
+<li>exang: angina inducida por el ejercicio (1 = sí; 0 = no)</li>
+<li>oldpeak: depresión del ST inducida por el ejercicio en relación con el descanso.</li>
+<li>slope: Pendiente maxima del segmento del ejercicio ST.</li>
+<li>ca: número de vasos principales (0-3) coloreados por fluoroscopia.</li>
+<li>thal: 3 = normal; 6 = defecto fijo; 7 = defecto reversible</li>
+<li>target: 1 o 0</li>
+</ul>
 
+Para la selección de los atributos, comenzaremos revisando las relaciones entre los distintos atributos y el atributo target el cual indica si existe o no un problema cardiaco, así diagnosticar si son representativos o pueden ser eliminados.
+
+
+```{r}
+#Cargamos antes algunas librerías que utilizaremos
+if(!require(ggplot2)){
+    install.packages('ggplot2', repos='http://cran.us.r-project.org')
+    library(ggplot2)
+}
+if(!require(grid)){
+    install.packages('grid', repos='http://cran.us.r-project.org')
+    library(grid)
+}
+if(!require(gridExtra)){
+    install.packages('gridExtra', repos='http://cran.us.r-project.org')
+    library(gridExtra)
+}
+
+
+#Trasformaremos algunos datos para poder grafcar las variables y encontrar las de interés
+
+diseases$target.tipo[diseases$target == 0 ]="Sin Problemas Cardiacos"
+diseases$target.tipo[diseases$target > 0 ]="Con Problemas Cardiacos"
+diseases$age.tipo[diseases$age < 40 ]="Menores a 40"
+diseases$age.tipo[diseases$age >= 40 & diseases$age < 50 ]="Mayor a 40 y menor a 50"
+diseases$age.tipo[diseases$age >= 50 & diseases$age < 60 ]="Mayor a 50 y menor a 60"
+diseases$age.tipo[diseases$age >= 60 & diseases$age < 70 ]="Mayor a 60 y menor a 70"
+diseases$age.tipo[diseases$age >= 70 ]="Mayores a 70"
+diseases$sex.tipo[diseases$sex == 0 ] = "Femenino"
+diseases$sex.tipo[diseases$sex == 1 ] = "Masculino"
+diseases$cp.tipo = as.factor(diseases$cp)
+diseases$trestbps.tipo[diseases$trestbps < 100] = "Menor a 100"
+diseases$trestbps.tipo[diseases$trestbps >= 100 & diseases$trestbps < 140] = "Mayor a 100 y menor a 150"
+diseases$trestbps.tipo[diseases$trestbps >= 140 & diseases$trestbps < 180] = "Mayor a 140 y menor a 180"
+diseases$trestbps.tipo[diseases$trestbps >= 180] = "Mayor a 180"
+diseases$chol.tipo[diseases$chol < 200] = "Menor a 200"
+diseases$chol.tipo[diseases$chol >= 200 & diseases$chol < 300] = "Mayor a 200 y menor a 300"
+diseases$chol.tipo[diseases$chol >= 300 & diseases$chol < 400] = "Mayor a 300 y menor a 400"
+diseases$chol.tipo[diseases$chol >= 400] = "Mayor a 400"
+diseases$fbs.tipo = as.factor(diseases$fbs)
+diseases$restecg.tipo = as.factor(diseases$restecg)
+diseases$thalach.tipo[diseases$thalach < 100] = "Menor a 100"
+diseases$thalach.tipo[diseases$thalach >= 100 & diseases$thalach  < 150] = "Mayor a 100 y menor a 150"
+diseases$thalach.tipo[diseases$thalach >= 150 & diseases$thalach  < 200] = "Mayor a 150 y menor a 200"
+diseases$thalach.tipo[diseases$thalach >= 200] = "Mayor a 100"
+diseases$exang.tipo = as.factor(diseases$exang)
+diseases$oldpeak.tipo[diseases$oldpeak < 1] = "Menor a 1"
+diseases$oldpeak.tipo[diseases$oldpeak >= 1 & diseases$oldpeak < 2] = "Mayor a 1 y menor a 2"
+diseases$oldpeak.tipo[diseases$oldpeak >= 2 & diseases$oldpeak < 3] = "Mayor a 2 y menor a 3"
+diseases$oldpeak.tipo[diseases$oldpeak >= 3 & diseases$oldpeak < 4] = "Mayor a 3 y menor a 4"
+diseases$oldpeak.tipo[diseases$oldpeak >= 4 & diseases$oldpeak < 5] = "Mayor a 4 y menor a 5"
+diseases$oldpeak.tipo[diseases$oldpeak >= 5] = "Mayor a 5"
+diseases$slope.tipo = as.factor(diseases$slope)
+diseases$ca.tipo = as.factor(diseases$ca)
+diseases$thal.tipo = as.factor(diseases$thal)
+
+
+# Distribución de las edades
+ggplot(diseases,aes(x = age)) + geom_density(bins =30,fill ="#52BE80") + theme_bw() + theme_classic() +ggtitle("Distribución de las edades") +ylab("Cantidad de personas")
+
+# Distribución de problemas cardiacos por edad
+ggplot(diseases,aes(age.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo Edad", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle(" cardiacos por edades")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+# Distribución por sexo
+ggplot(diseases,aes(x =sex.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("sex") 
+
+# Distribución de problemas cardiacos por sexo
+ggplot(diseases,aes(sex.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo sexo", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por sexo")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+# Distribución por CP
+ggplot(diseases,aes(x =cp.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("sex") 
+
+# Distribución de problemas cardiacos por CP
+#Esta es una variable importante en donde podemos ver que si el tipo de CP es 0 existen menos probabilidades que tenga un problema cardiaco.
+ggplot(diseases,aes(cp.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo cp", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por cp")+ scale_fill_manual(values=c("#52BE80","#F4D03F"))
+
+
+# Distribución por trestbps
+ggplot(diseases,aes(x = trestbps)) + geom_density(bins =30,fill ="#52BE80") + theme_bw() + theme_classic() +ggtitle("Distribución atributo chol")  + ylab("Cantidad")
+
+# Distribución de problemas cardiacos por trestbps
+ggplot(diseases,aes(trestbps.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo trestbps", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por trestbps")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+
+# Distribución chol
+ggplot(diseases,aes(x = chol)) + geom_density(bins =30,fill ="#52BE80") + theme_bw() + theme_classic() +ggtitle("Distribución atributo chol")  + ylab("Cantidad")
+
+# Distribución de problemas cardiacos por Chol
+ggplot(diseases,aes(chol.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo chol", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por chol")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+# Distribución fbs
+ggplot(diseases,aes(x =fbs.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("fbs") 
+
+# Distribución de problemas cardiacos por fbs
+ggplot(diseases,aes(fbs.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo fbs", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por fbs")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) 
+
+
+# Distribución restecg
+ggplot(diseases,aes(x =restecg.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("restecg") 
+
+# Distribución de problemas cardiacos por restecg
+ggplot(diseases,aes(restecg.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo restecg", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por restecg")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) 
+
+
+# Distribución thalach
+ggplot(diseases,aes(x = thalach)) + geom_density(bins =30,fill ="#52BE80") + theme_bw() + theme_classic() +ggtitle("Distribución atributo thalach")  + ylab("Cantidad")
+
+# Distribución de problemas cardiacos por thalach
+ggplot(diseases,aes(thalach.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo thalach", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por thalach")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+
+# Distribución exang
+ggplot(diseases,aes(x =exang.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("exang") 
+
+# Distribución de problemas cardiacos por exang
+ggplot(diseases,aes(exang.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo exang", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por exang")+ scale_fill_manual(values=c("#52BE80","#F4D03F"))
+
+
+# Distribución oldpeak
+ggplot(diseases,aes(x = oldpeak)) + geom_density(bins =30,fill ="#52BE80") + theme_bw() + theme_classic() +ggtitle("Distribución atributo oldpeak")  + ylab("Cantidad")
+
+# Distribución de problemas cardiacos por oldpeak
+ggplot(diseases,aes(oldpeak.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo oldpeak", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por oldpeak")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+# Distribución slope
+ggplot(diseases,aes(x =slope.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("slope") 
+
+# Distribución de problemas cardiacos por slope
+ggplot(diseases,aes(slope.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo slope", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por slope")+ scale_fill_manual(values=c("#52BE80","#F4D03F"))
+
+# Distribución ca
+ggplot(diseases,aes(x =ca.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("ca") 
+
+# Distribución de problemas cardiacos por ca
+# Podemos observar que con valores en cero mayor es la probabilidad de tener problemas cardiacos
+ggplot(diseases,aes(ca.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo ca", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por ca")+ scale_fill_manual(values=c("#52BE80","#F4D03F"))
+
+
+# Distribución thal
+ggplot(diseases,aes(x =thal.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("thal") 
+
+# Distribución de problemas cardiacos por thal
+ggplot(diseases,aes(thal.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo thal", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por thal")+ scale_fill_manual(values=c("#52BE80","#F4D03F"))
+```
+
+La variable "thal" presenta inconcistencia en su definición versua los datos descritos anteriormente, por lo que no se utilizará en el modelo.
+```{r}
+diseases$thal = NULL
+diseases$thal.tipo = NULL
+```
+
+Como podemos observar, el resto de las variables pueden tener relación en el diagnostico de un problema cardiaco y pueden ser combinadas entre ellas en modelos predictivo.
+
+
+##3. Limpieza de los datos. 
 ###3.1. ¿Los datos contienen ceros o elementos vacíos? ¿Cómo gestionarías cada uno de estos casos? 
+
 
 ###3.2. Identificación y tratamiento de valores extremos. 
 
@@ -38,7 +210,7 @@ summary(diseases)
 
 ###4.2. Comprobación de la normalidad y homogeneidad de la varianza. 
 
-Vamos a probar la normlalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normlalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a comprender su distribución.
+Vamos a probar la normlalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a comprender su distribución.
 
 ```{r}
 
