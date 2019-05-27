@@ -105,7 +105,7 @@ diseases$thal.tipo = as.factor(diseases$thal)
 ggplot(diseases,aes(x = age)) + geom_density(bins =30,fill ="#52BE80") + theme_bw() + theme_classic() +ggtitle("Distribución de las edades") +ylab("Cantidad de personas")
 
 # Distribución de problemas cardiacos por edad
-ggplot(diseases,aes(age.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo Edad", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle(" cardiacos por edades")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
+ggplot(diseases,aes(age.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo Edad", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por edades")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 # Distribución por sexo
 ggplot(diseases,aes(x =sex.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("sex") 
@@ -114,7 +114,7 @@ ggplot(diseases,aes(x =sex.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom
 ggplot(diseases,aes(sex.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo sexo", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por sexo")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 # Distribución por CP
-ggplot(diseases,aes(x =cp.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("sex") 
+ggplot(diseases,aes(x =cp.tipo)) + geom_bar(width = 0.2,fill ="#52BE80") + geom_text(stat = 'count',aes(label =..count..),vjust =-0.5) + theme_bw() + theme_classic() +ylab("Cantidad") + ggtitle("CP") 
 
 # Distribución de problemas cardiacos por CP
 #Esta es una variable importante en donde podemos ver que si el tipo de CP es 0 existen menos probabilidades que tenga un problema cardiaco.
@@ -122,7 +122,7 @@ ggplot(diseases,aes(cp.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo cp", y="
 
 
 # Distribución por trestbps
-ggplot(diseases,aes(x = trestbps)) + geom_density(bins =30,fill ="#52BE80") + theme_bw() + theme_classic() +ggtitle("Distribución atributo chol")  + ylab("Cantidad")
+ggplot(diseases,aes(x = trestbps)) + geom_density(bins =30,fill ="#52BE80") + theme_bw() + theme_classic() +ggtitle("Distribución atributo trestbps")  + ylab("Cantidad")
 
 # Distribución de problemas cardiacos por trestbps
 ggplot(diseases,aes(trestbps.tipo,fill=target.tipo))+geom_bar() +labs(x="Tipo trestbps", y="Problemas cardiacos")+ guides(fill=guide_legend(title=""))+ ggtitle("Problemas cardiacos por trestbps")+ scale_fill_manual(values=c("#52BE80","#F4D03F")) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
@@ -201,8 +201,137 @@ Como podemos observar, el resto de las variables pueden tener relación en el di
 ##3. Limpieza de los datos. 
 ###3.1. ¿Los datos contienen ceros o elementos vacíos? ¿Cómo gestionarías cada uno de estos casos? 
 
+Primero revisaremos si existen valores NA en el data set, si existiesen les realizaremos el tratamiento correspondiente.
+
+```{r}
+# Con la sentencia complete.cases revisamos que cada fila este completa devolviendo TRUE, si alguna fila tuviese NA devolvería FALSE. Guardaremos los valores en un vector para luego revisarlo.
+vectorNA <-complete.cases(diseases)
+# Revisamos si existe alguna fila con algún valor en NA
+vectorNA[FALSE]
+```
+
+```{r}
+# Otra forma de revisar la existencia de NA es la siguiente.
+sapply(diseases, function(x) sum(is.na(x)))
+```
+
+Como podemos ver, no existe ninguna fila con valores vacios. Si hubiesen existido podriamos gestionarlos, dependiendo el caso, eliminando el registro o ingresando alguna media de tendencia central.
+
+```{r}
+# Si hubiesemos necesitado eliminar los registros que alguna columna tuviese NA, sería con la siguiente instrucción
+diseases <- na.omit(diseases)
+```
+
+```{r}
+# Si alguna columna tuviese NA y su distribución de datos fuese uniforme, utilizariamos la media para reemplazar el datos faltante.
+# Por ejemplo, veremos el caso para la columna trestbps (datos de la presión arterial del paciente en reposo), en donde, con la siguiente instrucción reemplazaríamos los NA con la media 
+mean(diseases$age[!is.na(diseases$age)])
+diseases$age[is.na(diseases$age)] <-  mean(diseases$age[!is.na(diseases$age)])
+```
+
+
+```{r}
+# Si alguna columna tuviese NA y su distribución de datos estuviese sesgada, utilizariamos la mediana para reemplazar el datos faltante.
+# Por ejemplo, veremos el caso para la columna trestbps (datos de la presión arterial del paciente en reposo), en donde, con la siguiente instrucción reemplazaríamos los NA con la mediana 
+median(diseases$trestbps[!is.na(diseases$trestbps)])
+diseases$trestbps[is.na(diseases$trestbps)] <-  median(diseases$trestbps[!is.na(diseases$trestbps)])
+```
+
+Como podemos observar en el punto 2, al momento de analizar los datos de interés, se mostró la distribución de cada una de las columnas, en donde se logra validar que no existe valores en cero los cuales no aporten la realidad del dato. Por ejemplo, para la variable sex, el valor en cero tiene el significado para las personas de sexo femenino, en cambio si hubiese existido para la variable thalach (maximo ritmo cardiaco alcanzado) algún registro con valor en cero, no hubiese tenido sentido ese valor, el cual hubiesemos tenido que reemplazarlos por algún valor a convenir. Muchas veces tiene más sentido cambiar ese valor cero en NA, ya que en cero nos puede arruinar alguna medida como puede ser la media, en cambio con NA no la podemos considerar para el cálculo de la media.
+
+```{r}
+# Para transformar los valores cero en NA, utilizamos la siguiente instrucción
+diseases$thalach[diseases$thalach == 0] <- NA
+```
+
+Después de transformarla en NA, podemos reemplazarla por alguna medida de tendencia central con alguna técnica descrita anteriormente.
 
 ###3.2. Identificación y tratamiento de valores extremos. 
+
+A continuación identificaremos los valores extremos (outliers) de aquellas variables que sus datos puedan ser atípicos en relación con el resto.
+
+```{r}
+# Variable AGE, no se visualiza valores extremos
+boxplot(diseases$age)
+boxplot.stats(diseases$age)$out
+```
+
+```{r}
+# Variable CP, no se visualiza valores extremos
+boxplot(diseases$cp)
+boxplot.stats(diseases$cp)$out
+```
+
+```{r}
+# Variable trestbps. Podemos ver que existen valores extremos.
+boxplot(diseases$trestbps)
+# Aquí podemos ver valores que salen de lo común, a continuación los imprimiremos aquellos valores
+boxplot.stats(diseases$trestbps)$out
+```
+
+```{r}
+# Variable chol. Podemos ver que existen valores extremos.
+boxplot(diseases$chol)
+# Imprimimos aquellos valores atípicos
+boxplot.stats(diseases$chol)$out
+```
+
+```{r}
+# Variable restecg, no se visualiza valores extremos
+boxplot(diseases$restecg)
+boxplot.stats(diseases$restecg)$out
+```
+
+```{r}
+# Variable thalach. Podemos ver que existen valores extremos.
+boxplot(diseases$thalach)
+# Imprimimos aquellos valores atípicos
+boxplot.stats(diseases$thalach)$out
+```
+
+```{r}
+# Variable exang, no se visualiza valores extremos
+boxplot(diseases$exang)
+boxplot.stats(diseases$exang)$out
+```
+
+```{r}
+# Variable oldpeak. Podemos ver que existen valores extremos.
+boxplot(diseases$oldpeak)
+# Imprimimos aquellos valores atípicos
+boxplot.stats(diseases$oldpeak)$out
+```
+
+```{r}
+# Variable slope, no se visualiza valores extremos
+boxplot(diseases$slope)
+boxplot.stats(diseases$slope)$out
+```
+
+```{r}
+# Variable ca. Podemos ver que existen valores extremos.
+boxplot(diseases$ca)
+# Imprimimos aquellos valores atípicos
+boxplot.stats(diseases$ca)$out
+```
+
+
+Las variables con valores extremos son trestbps, chol, thalach, oldpeak, ca. Estos serán analizados a continuación para ver que realizar con ellos.
+<ul>
+<li>trestbps: Esta variable indica la presión arterial en reposo. Los valores extremos que arroja va desde 172 a 200,   con un total de 9 registros. Se revisó la distribución que se describe en el punto 2 y no representan anomalías, ya que se pueden dar estos casos.</li>
+<li>chol: Esta variable indica niveles de colesterol. Los valores que arroja va desde 394 a 564, con un total de 5 registros. Estos valores se escapan considerablemente con el resto de los demás datos. Se eliminarán.</li>
+<li>thalach: Esta variable indica máximos niveles de ritmo cardiaco alcanzado. El valor extremo arrojado es 71, en donde aparece solo una vez en el data set. Este valor es por bajo lo normal, pero dentro de lo esperado para validar si un paciente presenta problemas cardiacos, por lo que no se eliminará.</li>
+<li>oldpeak: Representa la depresión del degmento ST. Los valores que arroja va desde 4.2 a 6.2, con un total de 5 registros. Al revisar estos valores en la distribución de los datos que fueron representados en el punto 2, se escapan del resto de los demás datos, además estos datos extremos se encuentran sesgados en la representación de aquellos pacientes sin problemas cardiacos. Se eliminarán del data set.</li>
+<li>ca: Representa el número de vasos principales coloreados por fluoroscopia. Estos valores extremos que encontramos no representa alteraciones en la realidad o valores que nos vaya a distorcionar nuestros modelos predictivos, por lo que no se eliminarán.</li>
+</ul>
+
+```{r}
+#Eliminamos los valores extremos.
+diseases = diseases[diseases$oldpeak < min(boxplot.stats(diseases$oldpeak)$out),]
+diseases = diseases[diseases$chol < min(boxplot.stats(diseases$chol)$out),]
+```
+
+Finalmente quedamos con 293 registros de 303 iniciales.
 
 ##4. Análisis de los datos. 
 
