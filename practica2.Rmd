@@ -220,9 +220,7 @@ thalach<-diseases$thalach
 oldpeak<-diseases$oldpeak
 
 
-#boxplot(trestbps ,chol,thalach,oldpeak,main="resting blood pressure",
-#        names = c("trestbps ","chol","thalach","oldpeak"),border = "brown",
-#        col = c("orange","red","green","grey") )
+
 
 
 hist(trestbps,ylab=names("trestbps"),col=heat.colors(8))
@@ -242,6 +240,36 @@ shapiro.test(oldpeak)
 Como todos los valores del pvalue son muy pequeños podemos determinar que no tienen una distribución normal (se rechaza la hipótesis nula y por lo tanto asumimos que no hay normalidad en los datos).
 
 ###4.3. Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes. 
+
+Vamos a aplicar un árbol de de decisión. Para ello pasamos a factor nuestra variable target. Utilizaremos las 12 primeras variables (las no transformada). Separaremos el dataset en datos de training y datos de testing. Una vez creado el modelo veremos su precisión.
+
+```{r}
+
+#Pasamos a factor para crear el arbol
+diseases$target.tipo = as.factor(diseases$target.tipo)
+y <- diseases[,14] #target tipo 
+X <- diseases[,1:12] 
+indexes = sample(1:nrow(diseases), size=floor((2/3)*nrow(diseases)))
+trainX<-X[indexes,]
+trainy<-y[indexes]
+testX<-X[-indexes,]
+testy<-y[-indexes]
+#Primero visualizamos las reglas
+modelClasif <- C50::C5.0(trainX, trainy,rules=TRUE )
+summary(modelClasif)
+modelClasif <- C50::C5.0(trainX, trainy)
+plot(modelClasif,gp = gpar(fontsize = 4))
+predicted_model <- predict( modelClasif, testX, type="class" )
+print(sprintf("La precisión del árbol es: %.4f %%",100*sum(predicted_model == testy) / length(predicted_model)))
+
+
+
+```
+Vemos que la precisión es del 82.7 %. Lo podriamos utilizar para realizar predicciones.
+
+Por otra parte podemos destacar algunas reglas importante que se visualizan como son:
+-el 92% de los individus que cumplen trestbps <= 146 (presión arterial en reposo),oldpeak <= 0.7 (depresión del ST inducida por el ejercicio en relación con el descanso) y ca <= 0 (número de vasos principales  coloreados por fluoroscopia) tienen problemas cardíacos.
+-el 89% de los individus con cp <= 0 (con dolor en el pecho),trestbps <= 115 (se refiere a presión arterial) y ca <= 0 (número de vasos principales  coloreados por fluoroscopia) tienen problma cardíacos.
 
 ##5. Representación de los resultados a partir de tablas y gráficas. 
 
