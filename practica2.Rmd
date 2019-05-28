@@ -486,6 +486,9 @@ El segundo objetivo, el de obtener un modelo de predicción también ha sido con
 
 Evidentemente, si se necesitara profundizar en algun aspecto se tendría que hacer una revisión para ajustar los modelos o buscar otros que se adecuen a las necesidades.
 
+Para resolver las problemáticas hemos tenido que realizar las tareas habituales en un proyecto de datamining como son la limpieza y transformación de datos, la visualización y la generación de modelos.
+
+
 ##7. Código: Hay que adjuntar el código, preferiblemente en R, con el que se ha realizado la limpieza, análisis y representación de los datos. Si lo preferís, también podéis trabajar en Python.  
 
 ##7. Referencias
