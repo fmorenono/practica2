@@ -339,7 +339,7 @@ Finalmente quedamos con 293 registros de 303 iniciales.
 
 ###4.2. Comprobación de la normalidad y homogeneidad de la varianza. 
 
-Vamos a probar la normlalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a comprender su distribución.
+Vamos a probar la normlalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a intuir su distribución.
 
 ```{r}
 
@@ -356,8 +356,6 @@ hist(trestbps,ylab=names("trestbps"),col=heat.colors(8))
 hist(chol,ylab=names("chol"),col=heat.colors(8))
 hist(thalach,ylab=names("thalach"),col=heat.colors(8))
 hist(oldpeak,ylab=names("oldpeak"),col=heat.colors(8))
-
-
 
 shapiro.test(trestbps)
 shapiro.test(chol)
@@ -396,10 +394,12 @@ print(sprintf("La precisión del árbol es: %.4f %%",100*sum(predicted_model == 
 
 
 ```
-Vemos que la precisión es del 82.7 %. Lo podriamos utilizar para realizar predicciones.
+Vemos la precisión obtenida. Podríamos utilizar el modelo para realizar predicciones para realizar predicciones.
 
 Por otra parte podemos destacar algunas reglas importante que se visualizan como son:
+
 -el 92% de los individus que cumplen trestbps <= 146 (presión arterial en reposo),oldpeak <= 0.7 (depresión del ST inducida por el ejercicio en relación con el descanso) y ca <= 0 (número de vasos principales  coloreados por fluoroscopia) tienen problemas cardíacos.
+
 -el 89% de los individus con cp <= 0 (con dolor en el pecho),trestbps <= 115 (se refiere a presión arterial) y ca <= 0 (número de vasos principales  coloreados por fluoroscopia) tienen problema cardíacos.
 
 
@@ -474,6 +474,17 @@ table(testNV.data$target, testNV.data$PREDICCION, dnn = c("Actual", "Predicha"))
 ##5. Representación de los resultados a partir de tablas y gráficas. 
 
 ##6. Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema? 
+
+Lo que se quería con este estudio era por una parte detectar características de los pacientes que infuyen en que se parezca la enfermedad cardíaca o no. Por otra parte poder predecir de una manera precisa si los individuos con unas características concretas sufren la enfermedad en un porcentaje alto.
+
+El primer punto lo hemos conseguido responder con el análisis de los datos visuales y con la ayuda de algun análisis como la creación del árbol de clasificación que nos ha dado tambien una reglas. Por ejemplo, vemos que por diferenciando por sexo las mujeres tienen un más problemas cardíacos en porcentaje y que a menos oldpeak la probabilidad de sufrir la enfermedad es mayor. Las reglas obtenidas mediante el modelo C5.0 nos ha dado la información, como la siguiente:
+
+-individus que cumplen trestbps <= 146 (presión arterial en reposo),oldpeak <= 0.7 (depresión del ST inducida por el ejercicio en relación con el descanso) y ca <= 0 (número de vasos principales coloreados por fluoroscopia) tienen problemas cardíacos en un 92 %
+
+
+El segundo objetivo, el de obtener un modelo de predicción también ha sido conseguido. Se ha obtenido un modelo de regresión logística con más del 80% de precisión para predecir si una persona parece la enfermedad o no. 
+
+Evidentemente, si se necesitara profundizar en algun aspecto se tendría que hacer una revisión para ajustar los modelos o buscar otros que se adecuen a las necesidades.
 
 ##7. Código: Hay que adjuntar el código, preferiblemente en R, con el que se ha realizado la limpieza, análisis y representación de los datos. Si lo preferís, también podéis trabajar en Python.  
 
