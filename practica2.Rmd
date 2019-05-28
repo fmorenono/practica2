@@ -370,6 +370,8 @@ Como todos los valores del pvalue son muy pequeños podemos determinar que no ti
 
 ###4.3. Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes. 
 
+<h1>Árbol de Clasificación</h1>
+
 Vamos a aplicar un árbol de de decisión. Para ello pasamos a factor nuestra variable target. Utilizaremos las 12 primeras variables (las no transformada). Separaremos el dataset en datos de training y datos de testing. Una vez creado el modelo veremos su precisión.
 
 ```{r}
@@ -398,7 +400,76 @@ Vemos que la precisión es del 82.7 %. Lo podriamos utilizar para realizar predi
 
 Por otra parte podemos destacar algunas reglas importante que se visualizan como son:
 -el 92% de los individus que cumplen trestbps <= 146 (presión arterial en reposo),oldpeak <= 0.7 (depresión del ST inducida por el ejercicio en relación con el descanso) y ca <= 0 (número de vasos principales  coloreados por fluoroscopia) tienen problemas cardíacos.
--el 89% de los individus con cp <= 0 (con dolor en el pecho),trestbps <= 115 (se refiere a presión arterial) y ca <= 0 (número de vasos principales  coloreados por fluoroscopia) tienen problma cardíacos.
+-el 89% de los individus con cp <= 0 (con dolor en el pecho),trestbps <= 115 (se refiere a presión arterial) y ca <= 0 (número de vasos principales  coloreados por fluoroscopia) tienen problema cardíacos.
+
+
+
+<h1>Modelo de regresión logística</h1>
+
+```{r}
+#Preparamos los datos en un data set de entrenamiento y otro de test
+set.seed(99)
+dataRL <- diseases[,1:13]
+train.index <-sample(1:nrow(dataRL), size=floor((2/3)*nrow(dataRL)))
+train.data <- dataRL[train.index,]
+test.data <- dataRL[-train.index,]
+
+
+# Creamos el modelo de regresión logistica
+modeloRL <- glm(target~.,data =train.data,family =binomial)
+summary(modeloRL)
+
+
+# Agregamos a cada columna del nuestros datos de test la probabilidad y predicción
+test.data[, "PROB_SUCCESS"] <- predict(modeloRL, newdata = test.data, type="response")
+test.data[, "PREDICCION"] <- ifelse(test.data[, "PROB_SUCCESS"]>=0.5, 1, 0) # si las probabilidades supera el 50% indicamos 1, sino 0 (predicción a la variable target)
+head(test.data) # mostramos una muestra de la predicción
+
+# Nos indica la precisión del modelo
+print(sprintf("La precisión del árbol es: %.4f %%",100*mean(test.data$PREDICCION==test.data$target)))
+
+# Mostramos la matriz de confusión con los datos obtenidos en el test
+table(test.data[,"target"], test.data[,"PREDICCION"], dnn=c("Actual","Predicho"))
+```
+
+<h1>Algoritmo Naive Bayes</h1>
+
+```{r}
+# Instalamos la librería necesaria
+if(!require(e1071)){
+    install.packages('e1071', repos='http://cran.us.r-project.org')
+    library(e1071)
+}
+
+# Copiamos el data set para utilizarlo en el algoritmo
+dataNV <- diseases[,c("age.tipo","cp.tipo","trestbps.tipo","chol.tipo","restecg.tipo","exang.tipo","oldpeak.tipo","slope.tipo","ca.tipo","target")]
+dataNV$target <- as.factor(dataNV$target)
+
+# Creamos nuestros datos para el modelo y test
+trainNV.index <-sample(1:nrow(dataNV), size=floor((2/3)*nrow(dataNV)))
+trainNV.data <- dataNV[trainNV.index,]
+testNV.data <- dataNV[-trainNV.index,]
+
+# Ejecutamos el algoritmo
+mod <- naiveBayes(target~ ., data = trainNV.data)
+summary(mod)
+
+# Guardamos los valores predichos en el data set de test para luego compararlos
+testNV.data[, "PREDICCION"] <- predict(mod, testNV.data)
+
+# Vemos una muestra de las predicciones
+head(testNV.data)
+
+# Nos indica la precisión del modelo
+print(sprintf("La precisión del árbol es: %.4f %%",100*mean(testNV.data$PREDICCION==testNV.data$target)))
+
+# Vemos una tabla de confusión y comparamos los datos predecidos con los reales
+table(testNV.data$target, testNV.data$PREDICCION, dnn = c("Actual", "Predicha"))
+
+```
+
+
+
 
 ##5. Representación de los resultados a partir de tablas y gráficas. 
 
@@ -408,7 +479,7 @@ Por otra parte podemos destacar algunas reglas importante que se visualizan como
 
 ##7. Referencias
 
-El Data Se seleccionado está disponible en :
+El Data Set seleccionado está disponible en :
 https://www.kaggle.com/ronitf/heart-disease-uci
 
 ```{r}
