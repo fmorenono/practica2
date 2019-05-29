@@ -1,13 +1,31 @@
 ---
-title: "PRACTICA 2. TIPOLOGIA CICLO DE VIDA DE LOS DATOS"
-author: ""
-date: "24 de mayo de 2019"
-output: html_document
+title: 'PRACTICA 2.'
+author: "Victor Manuel Vásquez Rivas - Francisco Javier Moreno Hernández"
+date: "Mayo 2019"
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    includes:
+      in_header: input/header.html
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+  word_document: default
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval=T, echo=T)
+```
 
+******
+# Descripción, limpieza y tratamiento en los datos
+******
 
-##1. Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder? 
+## Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder? 
 
 El data set que hemos seleccionado, llamado "heart-disease-uci", o lo que es lo mismo, "enfermedades-corazon-uci", se refiere a pacientes.  Tenemos una lista de atributos con características de los pacientes, como son edad, sexo, colesterol en sangre, máximo ritmo cardíaco y otros indicadores médicos. La variable "target" indica si el paciente tiene enfermedad cardíaca o no y es la variable sobre la que querremos hacer predicciones.
 
@@ -17,14 +35,14 @@ Por otra parte, la variable "target" parece que nos va a permitir realizar estud
 
 ```{r}
 
-diseases<-read.csv("heart.csv", sep=",",na.strings = "NA")
+diseases<-read.csv("input/heart.csv", sep=",",na.strings = "NA")
 dim(diseases)
 str(diseases)
 summary(diseases)
 
 ```
 
-##2. Integración y selección de los datos de interés a analizar. 
+## Integración y selección de los datos de interés a analizar. 
 
 A continuación se describirán el significado de cada una de las variables del data set:
 <ul>
@@ -198,8 +216,8 @@ diseases$thal.tipo = NULL
 Como podemos observar, el resto de las variables pueden tener relación en el diagnostico de un problema cardiaco y pueden ser combinadas entre ellas en modelos predictivo.
 
 
-##3. Limpieza de los datos. 
-###3.1. ¿Los datos contienen ceros o elementos vacíos? ¿Cómo gestionarías cada uno de estos casos? 
+## Limpieza de los datos. 
+### ¿Los datos contienen ceros o elementos vacíos? ¿Cómo gestionarías cada uno de estos casos? 
 
 Primero revisaremos si existen valores NA en el data set, si existiesen les realizaremos el tratamiento correspondiente.
 
@@ -246,71 +264,71 @@ diseases$thalach[diseases$thalach == 0] <- NA
 
 Después de transformarla en NA, podemos reemplazarla por alguna medida de tendencia central con alguna técnica descrita anteriormente.
 
-###3.2. Identificación y tratamiento de valores extremos. 
+### Identificación y tratamiento de valores extremos. 
 
 A continuación identificaremos los valores extremos (outliers) de aquellas variables que sus datos puedan ser atípicos en relación con el resto.
 
 ```{r}
 # Variable AGE, no se visualiza valores extremos
-boxplot(diseases$age)
+boxplot(diseases$age, col ="#bed4de")
 boxplot.stats(diseases$age)$out
 ```
 
 ```{r}
 # Variable CP, no se visualiza valores extremos
-boxplot(diseases$cp)
+boxplot(diseases$cp, col ="#bed4de")
 boxplot.stats(diseases$cp)$out
 ```
 
 ```{r}
 # Variable trestbps. Podemos ver que existen valores extremos.
-boxplot(diseases$trestbps)
+boxplot(diseases$trestbps, col ="#bed4de")
 # Aquí podemos ver valores que salen de lo común, a continuación los imprimiremos aquellos valores
 boxplot.stats(diseases$trestbps)$out
 ```
 
 ```{r}
 # Variable chol. Podemos ver que existen valores extremos.
-boxplot(diseases$chol)
+boxplot(diseases$chol, col ="#bed4de")
 # Imprimimos aquellos valores atípicos
 boxplot.stats(diseases$chol)$out
 ```
 
 ```{r}
 # Variable restecg, no se visualiza valores extremos
-boxplot(diseases$restecg)
+boxplot(diseases$restecg, col ="#bed4de")
 boxplot.stats(diseases$restecg)$out
 ```
 
 ```{r}
 # Variable thalach. Podemos ver que existen valores extremos.
-boxplot(diseases$thalach)
+boxplot(diseases$thalach, col ="#bed4de")
 # Imprimimos aquellos valores atípicos
 boxplot.stats(diseases$thalach)$out
 ```
 
 ```{r}
 # Variable exang, no se visualiza valores extremos
-boxplot(diseases$exang)
+boxplot(diseases$exang, col ="#bed4de")
 boxplot.stats(diseases$exang)$out
 ```
 
 ```{r}
 # Variable oldpeak. Podemos ver que existen valores extremos.
-boxplot(diseases$oldpeak)
+boxplot(diseases$oldpeak, col ="#bed4de")
 # Imprimimos aquellos valores atípicos
 boxplot.stats(diseases$oldpeak)$out
 ```
 
 ```{r}
 # Variable slope, no se visualiza valores extremos
-boxplot(diseases$slope)
+boxplot(diseases$slope, col ="#bed4de")
 boxplot.stats(diseases$slope)$out
 ```
 
 ```{r}
 # Variable ca. Podemos ver que existen valores extremos.
-boxplot(diseases$ca)
+boxplot(diseases$ca, col ="#bed4de")
 # Imprimimos aquellos valores atípicos
 boxplot.stats(diseases$ca)$out
 ```
@@ -333,11 +351,20 @@ diseases = diseases[diseases$chol < min(boxplot.stats(diseases$chol)$out),]
 
 Finalmente quedamos con 293 registros de 303 iniciales.
 
-##4. Análisis de los datos. 
+******
+# Análisis y pruebas estadísticas
+******
+## Análisis de los datos. 
 
-###4.1. Selección de los grupos de datos que se quieren analizar/comparar (planificación de los análisis a aplicar). 
+### Selección de los grupos de datos que se quieren analizar/comparar (planificación de los análisis a aplicar). 
 
-###4.2. Comprobación de la normalidad y homogeneidad de la varianza. 
+La selección de datos finalmente quedará en los siguiente:
+
+```{r}
+str(diseases)
+```
+
+### Comprobación de la normalidad y homogeneidad de la varianza. 
 
 Vamos a probar la normlalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a intuir su distribución.
 
@@ -366,9 +393,13 @@ shapiro.test(oldpeak)
 ```
 Como todos los valores del pvalue son muy pequeños podemos determinar que no tienen una distribución normal (se rechaza la hipótesis nula y por lo tanto asumimos que no hay normalidad en los datos).
 
-###4.3. Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes. 
+### Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes. 
 
-<h1>Árbol de Clasificación</h1>
+A continuación se presentarán tres modelos para el análisis de datos, Árbol de Clasificación, Regresión Logística y Naive Bayes.
+
+******
+<h2>Árbol de Clasificación</h2>
+******
 
 Vamos a aplicar un árbol de de decisión. Para ello pasamos a factor nuestra variable target. Utilizaremos las 12 primeras variables (las no transformada). Separaremos el dataset en datos de training y datos de testing. Una vez creado el modelo veremos su precisión.
 
@@ -403,8 +434,9 @@ Por otra parte podemos destacar algunas reglas importante que se visualizan como
 -el 89% de los individus con cp <= 0 (con dolor en el pecho),trestbps <= 115 (se refiere a presión arterial) y ca <= 0 (número de vasos principales  coloreados por fluoroscopia) tienen problema cardíacos.
 
 
-
-<h1>Modelo de regresión logística</h1>
+******
+<h2>Modelo de regresión logística</h2>
+******
 
 ```{r}
 #Preparamos los datos en un data set de entrenamiento y otro de test
@@ -430,9 +462,15 @@ print(sprintf("La precisión del árbol es: %.4f %%",100*mean(test.data$PREDICCI
 
 # Mostramos la matriz de confusión con los datos obtenidos en el test
 table(test.data[,"target"], test.data[,"PREDICCION"], dnn=c("Actual","Predicho"))
+
+
+# Exportamos los datos de la predicción
+write.csv(test.data, file="output/RegresionLogistica.csv")
 ```
 
-<h1>Algoritmo Naive Bayes</h1>
+******
+<h2>Algoritmo Naive Bayes</h2>
+******
 
 ```{r}
 # Instalamos la librería necesaria
@@ -466,14 +504,17 @@ print(sprintf("La precisión del árbol es: %.4f %%",100*mean(testNV.data$PREDIC
 # Vemos una tabla de confusión y comparamos los datos predecidos con los reales
 table(testNV.data$target, testNV.data$PREDICCION, dnn = c("Actual", "Predicha"))
 
+
+# Exportamos los datos de la predicción
+write.csv(test.data, file="output/NaiveBayes.csv")
 ```
 
 
 
 
-##5. Representación de los resultados a partir de tablas y gráficas. 
+## Representación de los resultados a partir de tablas y gráficas. 
 
-##6. Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema? 
+## Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema? 
 
 Lo que se quería con este estudio era por una parte detectar características de los pacientes que infuyen en que se parezca la enfermedad cardíaca o no. Por otra parte poder predecir de una manera precisa si los individuos con unas características concretas sufren la enfermedad en un porcentaje alto.
 
@@ -489,16 +530,16 @@ Evidentemente, si se necesitara profundizar en algun aspecto se tendría que hac
 Para resolver las problemáticas hemos tenido que realizar las tareas habituales en un proyecto de datamining como son la limpieza y transformación de datos, la visualización y la generación de modelos.
 
 
-##7. Código: Hay que adjuntar el código, preferiblemente en R, con el que se ha realizado la limpieza, análisis y representación de los datos. Si lo preferís, también podéis trabajar en Python.  
+## Código: Hay que adjuntar el código, preferiblemente en R, con el que se ha realizado la limpieza, análisis y representación de los datos. Si lo preferís, también podéis trabajar en Python.  
 
-##7. Referencias
+El código lo pueden encontrar en https://github.com/fmorenono/practica2
+
+## Referencias
 
 El Data Set seleccionado está disponible en :
 https://www.kaggle.com/ronitf/heart-disease-uci
 
-```{r}
 
-
-```
-
+<br>
+<br>
 
