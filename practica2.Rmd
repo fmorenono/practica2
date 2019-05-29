@@ -506,7 +506,7 @@ table(testNV.data$target, testNV.data$PREDICCION, dnn = c("Actual", "Predicha"))
 
 
 # Exportamos los datos de la predicción
-write.csv(test.data, file="output/NaiveBayes.csv")
+write.csv(testNV.data, file="output/NaiveBayes.csv")
 ```
 
 
