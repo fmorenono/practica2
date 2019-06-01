@@ -62,6 +62,7 @@ A continuación se describirán el significado de cada una de las variables del 
 <li>target: 1 o 0</li>
 </ul>
 
+
 Para la selección de los atributos, comenzaremos revisando las relaciones entre los distintos atributos y el atributo target el cual indica si existe o no un problema cardiaco, así diagnosticar si son representativos o pueden ser eliminados.
 
 
@@ -79,7 +80,10 @@ if(!require(gridExtra)){
     install.packages('gridExtra', repos='http://cran.us.r-project.org')
     library(gridExtra)
 }
-
+if(!require(fBasics)){
+    install.packages('fBasics', repos='http://cran.us.r-project.org')
+    library(fBasics)
+}
 
 #Trasformaremos algunos datos para poder grafcar las variables y encontrar las de interés
 
@@ -380,19 +384,60 @@ oldpeak<-diseases$oldpeak
 
 
 
-hist(trestbps,ylab=names("trestbps"),col=heat.colors(8))
-hist(chol,ylab=names("chol"),col=heat.colors(8))
-hist(thalach,ylab=names("thalach"),col=heat.colors(8))
-hist(oldpeak,ylab=names("oldpeak"),col=heat.colors(8))
+hist(trestbps,main = "Histograma variable trestbps",ylab=names("trestbps"),col=heat.colors(8))
+hist(chol,main = "Histograma variable chol",ylab=names("chol"),col=heat.colors(8))
+hist(thalach,main = "Histograma variable thalach",ylab=names("thalach"),col=heat.colors(8))
+hist(oldpeak,main = "Histograma variable oldpeak",ylab=names("oldpeak"),col=heat.colors(8))
 
+
+
+
+#trestbps<-presión arterial en reposo (en mm Hg al ingreso en el hospital)
 shapiro.test(trestbps)
+
+#chol<-suero colestoral en mg/dl
 shapiro.test(chol)
+
+#thalach<-maximo ritmo cardiaco alcanzado
 shapiro.test(thalach)
+
+#oldpeak<-depresión del ST inducida por el ejercicio en relación con el descanso.
 shapiro.test(oldpeak)
 
 
 ```
-Como todos los valores del pvalue son muy pequeños podemos determinar que no tienen una distribución normal (se rechaza la hipótesis nula y por lo tanto asumimos que no hay normalidad en los datos).
+Respecto a todas la variables, exceptuando la variable chol, los valores del pvalue son muy pequeños y podemos determinar que no tienen una distribución normal (se rechaza la hipótesis nula y por lo tanto asumimos que no hay normalidad en los datos). La variable chol si podemos considerar que tiene distribución normal (pvalue=0.1734>0.05). Si vemos el gráfico de esa variable podemos ver esa característica.
+
+
+A continuación trataremos el análisis de la varianza.
+Vamos a realizar un análisis unifactorial, donde la variable dependiente va a ser chol y la variable independiente será el sexo. En otras palabras, determinaremos si el nivel de chol (suero colestoral en mg/d) viene determinado por el sexo. 
+Al tener muestras grandes de más de 30 no es necesario que confirmemos que la distribución de cada grupo (hombres/mujeres) es normal.
+
+```{r}
+#tapply(diseases$chol, diseases$sex, mean)
+#variable chol<-suero colestoral en mg/dl
+fligner.test(chol ~ sex, data = diseases)
+#Otra forma de realizar la prueba varianceTest(diseases$chol[diseases$sex=='0'], diseases$chol[diseases$sex=='1'], method = "fligner")
+
+```
+Al ser p-value mayor al nivel de significación 0.05 podemos concluir que hay diferencias significativas entre las varianzas.
+
+Ahora repetimos la prueba para las variabels trestbps,thalach y oldpeak y siendo la varaible dependiente tambien el sexo.
+
+
+
+```{r}
+
+
+#variable trestbps<-presión arterial en reposo (en mm Hg al ingreso en el hospital)
+fligner.test(trestbps ~ sex, data = diseases)
+#variable thalach<-maximo ritmo cardiaco alcanzado
+fligner.test(thalach ~ sex, data = diseases)
+#variable oldpeak<-depresión del ST inducida por el ejercicio en relación con el descanso.
+fligner.test(oldpeak ~ sex, data = diseases)
+```
+
+Solo para oldpeak obtenemos un resultado diferente, en el que podemos concluir que no hay diferencias signficativas entre las varianzas. Acabamos nuestro estudio de análisis de varianza aquí. Podría ampliarse con el estudio de otras variables o incluso realizando análisis multifactorial si se requiriera profundizar en algun aspecto concreto del estudio.
 
 ### Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes. 
 
