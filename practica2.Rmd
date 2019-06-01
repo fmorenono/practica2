@@ -268,69 +268,70 @@ Después de transformarla en NA, podemos reemplazarla por alguna medida de tende
 
 A continuación identificaremos los valores extremos (outliers) de aquellas variables que sus datos puedan ser atípicos en relación con el resto.
 
+
 ```{r}
 # Variable AGE, no se visualiza valores extremos
-boxplot(diseases$age, col ="#bed4de")
-boxplot.stats(diseases$age)$out
+boxplot(diseases$age, main = "Distribución variable AGE", ylab = "Cantidad", col ="#bed4de", border = "brown")
+boxplot.stats(diseases$age)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable CP, no se visualiza valores extremos
-boxplot(diseases$cp, col ="#bed4de")
-boxplot.stats(diseases$cp)$out
+boxplot(diseases$cp, main = "Distribución variable CP", ylab = "Cantidad", col ="#bed4de", border = "brown")
+boxplot.stats(diseases$cp)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable trestbps. Podemos ver que existen valores extremos.
-boxplot(diseases$trestbps, col ="#bed4de")
+boxplot(diseases$trestbps, main = "Distribución variable Trestbps", ylab = "Cantidad", col ="#bed4de", border = "brown")
 # Aquí podemos ver valores que salen de lo común, a continuación los imprimiremos aquellos valores
-boxplot.stats(diseases$trestbps)$out
+boxplot.stats(diseases$trestbps)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable chol. Podemos ver que existen valores extremos.
-boxplot(diseases$chol, col ="#bed4de")
+boxplot(diseases$chol, main = "Distribución variable Chol", ylab = "Cantidad", col ="#bed4de", border = "brown")
 # Imprimimos aquellos valores atípicos
-boxplot.stats(diseases$chol)$out
+boxplot.stats(diseases$chol)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable restecg, no se visualiza valores extremos
-boxplot(diseases$restecg, col ="#bed4de")
-boxplot.stats(diseases$restecg)$out
+boxplot(diseases$restecg, main = "Distribución variable Restecg", ylab = "Cantidad", col ="#bed4de", border = "brown")
+boxplot.stats(diseases$restecg)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable thalach. Podemos ver que existen valores extremos.
-boxplot(diseases$thalach, col ="#bed4de")
+boxplot(diseases$thalach, main = "Distribución variable Thalach", ylab = "Cantidad", col ="#bed4de", border = "brown")
 # Imprimimos aquellos valores atípicos
-boxplot.stats(diseases$thalach)$out
+boxplot.stats(diseases$thalach)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable exang, no se visualiza valores extremos
-boxplot(diseases$exang, col ="#bed4de")
-boxplot.stats(diseases$exang)$out
+boxplot(diseases$exang, main = "Distribución variable Exang", ylab = "Cantidad", col ="#bed4de", border = "brown")
+boxplot.stats(diseases$exang)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable oldpeak. Podemos ver que existen valores extremos.
-boxplot(diseases$oldpeak, col ="#bed4de")
+boxplot(diseases$oldpeak, main = "Distribución variable Oldpeak", ylab = "Cantidad", col ="#bed4de", border = "brown")
 # Imprimimos aquellos valores atípicos
-boxplot.stats(diseases$oldpeak)$out
+boxplot.stats(diseases$oldpeak)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable slope, no se visualiza valores extremos
-boxplot(diseases$slope, col ="#bed4de")
-boxplot.stats(diseases$slope)$out
+boxplot(diseases$slope, main = "Distribución variable Slope", ylab = "Cantidad", col ="#bed4de", border = "brown")
+boxplot.stats(diseases$slope)$out #Muestra los valores extremos si hubiesen 
 ```
 
 ```{r}
 # Variable ca. Podemos ver que existen valores extremos.
-boxplot(diseases$ca, col ="#bed4de")
+boxplot(diseases$ca, main = "Distribución variable CA", ylab = "Cantidad", col ="#bed4de", border = "brown")
 # Imprimimos aquellos valores atípicos
-boxplot.stats(diseases$ca)$out
+boxplot.stats(diseases$ca)$out #Muestra los valores extremos si hubiesen 
 ```
 
 
@@ -366,7 +367,7 @@ str(diseases)
 
 ### Comprobación de la normalidad y homogeneidad de la varianza. 
 
-Vamos a probar la normlalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a intuir su distribución.
+Vamos a probar la normalalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a intuir su distribución.
 
 ```{r}
 
@@ -422,7 +423,14 @@ plot(modelClasif,gp = gpar(fontsize = 4))
 predicted_model <- predict( modelClasif, testX, type="class" )
 print(sprintf("La precisión del árbol es: %.4f %%",100*sum(predicted_model == testy) / length(predicted_model)))
 
+testX[,"target"] <- testy
+testX[,"PREDICCION"] <-predict( modelClasif, testX, type="class" )
 
+# Mostramos la matriz de confusión con los datos obtenidos en el test
+table(testX[,"target"], testX[,"PREDICCION"], dnn=c("Actual","Predicho"))
+
+# Exportamos los datos de la predicción
+write.csv(testX, file="output/ArbolClasificacion.csv")
 
 ```
 Vemos la precisión obtenida. Podríamos utilizar el modelo para realizar predicciones para realizar predicciones.
@@ -447,7 +455,7 @@ train.data <- dataRL[train.index,]
 test.data <- dataRL[-train.index,]
 
 
-# Creamos el modelo de regresión logistica
+# Creamos el modelo de regresión logistica basado en target, la cual es nuestra variable a predecir
 modeloRL <- glm(target~.,data =train.data,family =binomial)
 summary(modeloRL)
 
@@ -458,7 +466,7 @@ test.data[, "PREDICCION"] <- ifelse(test.data[, "PROB_SUCCESS"]>=0.5, 1, 0) # si
 head(test.data) # mostramos una muestra de la predicción
 
 # Nos indica la precisión del modelo
-print(sprintf("La precisión del árbol es: %.4f %%",100*mean(test.data$PREDICCION==test.data$target)))
+print(sprintf("La precisión es: %.4f %%",100*mean(test.data$PREDICCION==test.data$target)))
 
 # Mostramos la matriz de confusión con los datos obtenidos en el test
 table(test.data[,"target"], test.data[,"PREDICCION"], dnn=c("Actual","Predicho"))
@@ -499,7 +507,7 @@ testNV.data[, "PREDICCION"] <- predict(mod, testNV.data)
 head(testNV.data)
 
 # Nos indica la precisión del modelo
-print(sprintf("La precisión del árbol es: %.4f %%",100*mean(testNV.data$PREDICCION==testNV.data$target)))
+print(sprintf("La precisión es: %.4f %%",100*mean(testNV.data$PREDICCION==testNV.data$target)))
 
 # Vemos una tabla de confusión y comparamos los datos predecidos con los reales
 table(testNV.data$target, testNV.data$PREDICCION, dnn = c("Actual", "Predicha"))
@@ -510,6 +518,81 @@ write.csv(testNV.data, file="output/NaiveBayes.csv")
 ```
 
 
+
+******
+<h2>Cross Validation para los modelos propuestos</h2>
+******
+
+Pasaremos a revisar con K iteraciones la validez de las predicciones de los modelos seleccionados. La cantidad de iteraciones elegidas es 10.
+
+```{r}
+library(caret)
+folds <- createFolds(dataRL$target, k = 10)
+
+# Cross Validation para Árbol de Clasificación
+# Iteramos el método de Árbol de Clasificación en K veces para probar nuestro modelo y predecir su verdadera efectividad
+cvC50ArbolClasificacion <- lapply(folds, function(x){
+  trainX<-X[-x,]
+  trainy<-y[-x]
+  testX<-X[x,]
+  testy<-y[x]
+  modelClasif <- C50::C5.0(trainX, trainy)
+  predicted_model <- predict( modelClasif, testX, type="class" )
+  precision <- sum(predicted_model == testy) / length(predicted_model)
+  return(precision)
+})
+#Calculamos la media aritmética de k iteraciones
+precisionC50ArbolClasificacion <- mean(as.numeric(cvC50ArbolClasificacion))
+print(sprintf("La precisión para Árbol de clasificación en Cross Validation: %.4f %%",100*precisionC50ArbolClasificacion))
+
+
+
+# Cross Validation para Regresion Logistica
+# Iteramos el método Regresion Logistica en K veces para probar nuestro modelo y predecir su verdadera efectividad
+cvRegresionLogistica <- lapply(folds, function(x){
+  training_fold <- dataRL[-x, ]
+  test_fold <- dataRL[x, ]
+  clasificador <- glm(target ~ ., family = binomial, data = training_fold)
+  y_pred <- predict(clasificador, type = 'response', newdata = test_fold)
+  y_pred <- ifelse(y_pred > 0.5, 1, 0)
+  #y_pred <- factor(y_pred, levels = c("0", "1"), labels = c("NoPulsar", "Pulsar"))
+  cm <- table(test_fold$target, y_pred)
+  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
+  return(precision)
+})
+#Calculamos la media aritmética de k iteraciones
+precisionRegresionLogistica <- mean(as.numeric(cvRegresionLogistica))
+print(sprintf("La precisión de Regresión Logística en Cross Validation: %.4f %%",100*precisionRegresionLogistica))
+
+
+# Cross Validation para NaiveBayes
+# Iteramos el método de NaiveBayes en K veces para probar nuestro modelo y predecir su verdadera efectividad
+cvNaiveBayes <- lapply(folds, function(x){
+  training_fold <- dataNV[-x, ]
+  test_fold <- dataNV[x, ]
+  clasificador <- naiveBayes(target ~ ., data = training_fold)
+  y_pred <- predict(clasificador, newdata = test_fold)
+  cm <- table(test_fold$target, y_pred)
+  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
+  return(precision)
+})
+#Calculamos la media aritmética de k iteraciones
+precisionNaiveBayes <- mean(as.numeric(cvNaiveBayes))
+print(sprintf("La precisión para NaiveBayes en Cross Validation: %.4f %%",100*precisionNaiveBayes))
+```
+
+A coninuación se mostrarán los métodos ordenados descendentemente por el porcentaje de predicción de todos los modelos.
+
+```{r}
+vectorResultados = c(precisionC50ArbolClasificacion*100,precisionRegresionLogistica*100,precisionNaiveBayes*100)
+M1 = cbind(vectorResultados,c("Árbol Clasificación", "Regresión Logística","Naive Bayes")) #Creamos la matriz 
+colnames(M1) <- c("Porcentaje", "Modelo")
+# Ordenamos y mostramos los resultados
+M1[order(M1[,"Porcentaje"],decreasing = TRUE), ]
+```
+
+
+Los resultados del Cross Validation nos puede dar la visión por cuál de los modelos nos podemos inclinar, entregando un mejor resultado en la verisidad de la predicción. 
 
 
 ## Representación de los resultados a partir de tablas y gráficas. 
