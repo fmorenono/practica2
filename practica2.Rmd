@@ -621,23 +621,30 @@ cvNaiveBayes <- lapply(folds, function(x){
   precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
   return(precision)
 })
+
 #Calculamos la media aritmética de k iteraciones
 precisionNaiveBayes <- mean(as.numeric(cvNaiveBayes))
 print(sprintf("La precisión para NaiveBayes en Cross Validation: %.4f %%",100*precisionNaiveBayes))
 ```
 
-A coninuación se mostrarán los métodos ordenados descendentemente por el porcentaje de predicción de todos los modelos.
+A continuación se mostrarán los métodos ordenados descendentemente por el porcentaje y error de predicción, la varianza y desviación estandar de todos los modelos que se sometieron al cross validation.
 
 ```{r}
-vectorResultados = c(precisionC50ArbolClasificacion*100,precisionRegresionLogistica*100,precisionNaiveBayes*100)
-M1 = cbind(vectorResultados,c("Árbol Clasificación", "Regresión Logística","Naive Bayes")) #Creamos la matriz 
-colnames(M1) <- c("Porcentaje", "Modelo")
+vectorMedia = c(precisionC50ArbolClasificacion*100,precisionRegresionLogistica*100,precisionNaiveBayes*100)
+vectorError = c(100-precisionC50ArbolClasificacion*100,100-precisionRegresionLogistica*100,100-precisionNaiveBayes*100)
+vectorVarianza = c(var(as.numeric(cvC50ArbolClasificacion)*100), var(as.numeric(cvRegresionLogistica)*100), var(as.numeric(cvNaiveBayes)*100))
+vectorDesviacion = c(sd(as.numeric(cvC50ArbolClasificacion)*100), sd(as.numeric(cvRegresionLogistica)*100), sd(as.numeric(cvNaiveBayes)*100))
+M1 = cbind(c("Árbol Clasificacion", "Regresion Logistica","Naive Bayes"),vectorMedia,vectorError, vectorVarianza,vectorDesviacion)
+colnames(M1) <- c("Modelo", "Porcentaje Predicción", "Error", "Varianza", "Desviación")
+```
+
+```{r}
 # Ordenamos y mostramos los resultados
-M1[order(M1[,"Porcentaje"],decreasing = TRUE), ]
+M1[order(M1[,"Porcentaje Predicción"],decreasing = TRUE), ] 
 ```
 
 
-Los resultados del Cross Validation nos puede dar la visión por cuál de los modelos nos podemos inclinar, entregando un mejor resultado en la verisidad de la predicción. 
+Los resultados del Cross Validation nos puede dar la visión por cuál de los modelos nos podemos inclinar, entregando un mejor resultado en la verisidad de la predicción. Para selección del modelo apropiado, podemos tomar como referencia el porcentaje de predicción +- la desviación estandar.
 
 
 ## Representación de los resultados a partir de tablas y gráficas. 
