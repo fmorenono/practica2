@@ -356,6 +356,103 @@ diseases = diseases[diseases$chol < min(boxplot.stats(diseases$chol)$out),]
 
 Finalmente quedamos con 293 registros de 303 iniciales.
 
+
+### Correlación entre variables
+
+Revisaremos la correlación entre todas las variables númericas, en donde buscaremos correlaciones menores a -0.5 o mayores a 0.5, siendo 1 y -1 correlaciones perfectas y 0 ninguna correlación, de esta manera consideraremos si es suficiente para una posible eliminación de la variable, por considerarla redundante entre ellas.
+
+```{r}
+cor(diseases$age, diseases$sex) # correlación entre age y sex
+cor(diseases$age, diseases$cp) # correlación entre age y cp
+cor(diseases$age, diseases$trestbps) # correlación entre age y trestbps
+cor(diseases$age, diseases$chol) # correlación entre age y chol
+cor(diseases$age, diseases$fbs) # correlación entre age y fbs
+cor(diseases$age, diseases$restecg) # correlación entre age y restecg
+cor(diseases$age, diseases$thalach) # correlación entre age y thalach
+cor(diseases$age, diseases$exang) # correlación entre age y exang
+cor(diseases$age, diseases$oldpeak) # correlación entre age y oldpeak
+cor(diseases$age, diseases$slope) # correlación entre age y slope
+cor(diseases$age, diseases$ca) # correlación entre age y ca
+
+cor(diseases$sex, diseases$cp) # correlación entre sex y cp
+cor(diseases$sex, diseases$trestbps) # correlación entre sex y trestbps
+cor(diseases$sex, diseases$chol) # correlación entre sex y chol
+cor(diseases$sex, diseases$fbs) # correlación entre sex y fbs
+cor(diseases$sex, diseases$restecg) # correlación entre sex y restecg
+cor(diseases$sex, diseases$thalach) # correlación entre sex y thalach
+cor(diseases$sex, diseases$exang) # correlación entre sex y exang
+cor(diseases$sex, diseases$oldpeak) # correlación entre sex y oldpeak
+cor(diseases$sex, diseases$slope) # correlación entre sex y slope
+cor(diseases$sex, diseases$ca) # correlación entre sex y ca
+
+cor(diseases$cp, diseases$trestbps) # correlación entre cp y trestbps
+cor(diseases$cp, diseases$chol) # correlación entre cp y chol
+cor(diseases$cp, diseases$fbs) # correlación entre cp y fbs
+cor(diseases$cp, diseases$restecg) # correlación entre cp y restecg
+cor(diseases$cp, diseases$thalach) # correlación entre cp y thalach
+cor(diseases$cp, diseases$exang) # correlación entre cp y exang
+cor(diseases$cp, diseases$oldpeak) # correlación entre cp y oldpeak
+cor(diseases$cp, diseases$slope) # correlación entre cp y slope
+cor(diseases$cp, diseases$ca) # correlación entre cp y ca
+
+cor(diseases$trestbps, diseases$chol) # correlación entre trestbps y chol
+cor(diseases$trestbps, diseases$fbs) # correlación entre trestbps y fbs
+cor(diseases$trestbps, diseases$restecg) # correlación entre trestbps y restecg
+cor(diseases$trestbps, diseases$thalach) # correlación entre trestbps y thalach
+cor(diseases$trestbps, diseases$exang) # correlación entre trestbps y exang
+cor(diseases$trestbps, diseases$oldpeak) # correlación entre trestbps y oldpeak
+cor(diseases$trestbps, diseases$slope) # correlación entre trestbps y slope
+cor(diseases$trestbps, diseases$ca) # correlación entre trestbps y ca
+
+cor(diseases$chol, diseases$fbs) # correlación entre chol y fbs
+cor(diseases$chol, diseases$restecg) # correlación entre chol y restecg
+cor(diseases$chol, diseases$thalach) # correlación entre chol y thalach
+cor(diseases$chol, diseases$exang) # correlación entre chol y exang
+cor(diseases$chol, diseases$oldpeak) # correlación entre chol y oldpeak
+cor(diseases$chol, diseases$slope) # correlación entre chol y slope
+cor(diseases$chol, diseases$ca) # correlación entre chol y ca
+
+cor(diseases$fbs, diseases$restecg) # correlación entre fbs y restecg
+cor(diseases$fbs, diseases$thalach) # correlación entre fbs y thalach
+cor(diseases$fbs, diseases$exang) # correlación entre fbs y exang
+cor(diseases$fbs, diseases$oldpeak) # correlación entre fbs y oldpeak
+cor(diseases$fbs, diseases$slope) # correlación entre fbs y slope
+cor(diseases$fbs, diseases$ca) # correlación entre fbs y ca
+
+cor(diseases$restecg, diseases$thalach) # correlación entre restecg y thalach
+cor(diseases$restecg, diseases$exang) # correlación entre restecg y exang
+cor(diseases$restecg, diseases$oldpeak) # correlación entre restecg y oldpeak
+cor(diseases$restecg, diseases$slope) # correlación entre restecg y slope
+cor(diseases$restecg, diseases$ca) # correlación entre restecg y ca
+
+cor(diseases$thalach, diseases$exang) # correlación entre thalach y exang
+cor(diseases$thalach, diseases$oldpeak) # correlación entre thalach y oldpeak
+cor(diseases$thalach, diseases$slope) # correlación entre thalach y slope
+cor(diseases$thalach, diseases$ca) # correlación entre thalach y ca
+
+cor(diseases$exang, diseases$oldpeak) # correlación entre exang y oldpeak
+cor(diseases$exang, diseases$slope) # correlación entre exang y slope
+cor(diseases$exang, diseases$ca) # correlación entre exang y ca
+
+cor(diseases$oldpeak, diseases$slope)  # correlación entre oldpeak y slope
+cor(diseases$oldpeak, diseases$ca)  # correlación entre oldpeak y ca
+
+cor(diseases$slope, diseases$ca) # correlación entre slope y ca
+
+```
+
+Como podemos observar, existe una correlación negativa moderada -0.537684, entre las variables oldpeak y slope, ésta no es muy alta pero se realizarán las pruebas cuando generemos los modelos predictivos, considerando las dos y luego solo una de ellas para ver si mejora el porcentaje de predicción.
+
+```{r}
+if(!require(PerformanceAnalytics)){
+  install.packages('PerformanceAnalytics', repos='http://cran.us.r-project.org')
+  library(PerformanceAnalytics)
+}
+dat1 <- data.frame(diseases$oldpeak, diseases$slope)
+chart.Correlation(dat1) # graficamos la correlación 
+```
+
+
 ******
 # Análisis y pruebas estadísticas
 ******
@@ -645,6 +742,82 @@ M1[order(M1[,"Porcentaje Predicción"],decreasing = TRUE), ]
 
 
 Los resultados del Cross Validation nos puede dar la visión por cuál de los modelos nos podemos inclinar, entregando un mejor resultado en la verisidad de la predicción. Para selección del modelo apropiado, podemos tomar como referencia el porcentaje de predicción +- la desviación estandar.
+
+
+
+<h2>Probando la eliminación slope por correlación entre oldspeak</h2>
+
+Ahora veremos eliminado la variable slope, probando si la correlación entre oldspeak es suficiente como para eliminarla por redundancia.
+
+```{r}
+X$slope <- NULL
+
+# Cross Validation para Árbol de Clasificación sin variable slope
+cvC50ArbolClasificacion <- lapply(folds, function(x){
+  trainX<-X[-x,]
+  trainy<-y[-x]
+  testX<-X[x,]
+  testy<-y[x]
+  modelClasif <- C50::C5.0(trainX, trainy)
+  predicted_model <- predict( modelClasif, testX, type="class" )
+  precision <- sum(predicted_model == testy) / length(predicted_model)
+  return(precision)
+})
+#Calculamos la media aritmética de k iteraciones
+precisionC50ArbolClasificacion <- mean(as.numeric(cvC50ArbolClasificacion))
+print(sprintf("La precisión para Árbol de clasificación en Cross Validation: %.4f %%",100*precisionC50ArbolClasificacion))
+
+
+dataRL <- diseases[,1:13]
+dataRL$slope <- NULL
+# Cross Validation para Regresion Logistica  sin variable slope
+cvRegresionLogistica <- lapply(folds, function(x){
+  training_fold <- dataRL[-x, ]
+  test_fold <- dataRL[x, ]
+  clasificador <- glm(target ~ ., family = binomial, data = training_fold)
+  y_pred <- predict(clasificador, type = 'response', newdata = test_fold)
+  y_pred <- ifelse(y_pred > 0.5, 1, 0)
+  #y_pred <- factor(y_pred, levels = c("0", "1"), labels = c("NoPulsar", "Pulsar"))
+  cm <- table(test_fold$target, y_pred)
+  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
+  return(precision)
+})
+#Calculamos la media aritmética de k iteraciones
+precisionRegresionLogistica <- mean(as.numeric(cvRegresionLogistica))
+print(sprintf("La precisión de Regresión Logística en Cross Validation: %.4f %%",100*precisionRegresionLogistica))
+
+
+dataNV <- diseases[,c("age.tipo","cp.tipo","trestbps.tipo","chol.tipo","restecg.tipo","exang.tipo","oldpeak.tipo","slope.tipo","ca.tipo","target")]
+dataNV$target <- as.factor(dataNV$target)
+dataNV$slope.tipo<- NULL
+# Cross Validation para NaiveBayes  sin variable slope
+cvNaiveBayes <- lapply(folds, function(x){
+  training_fold <- dataNV[-x, ]
+  test_fold <- dataNV[x, ]
+  clasificador <- naiveBayes(target ~ ., data = training_fold)
+  y_pred <- predict(clasificador, newdata = test_fold)
+  cm <- table(test_fold$target, y_pred)
+  precision <- (cm[1,1] + cm[2,2]) / (cm[1,1] + cm[2,2] +cm[1,2] + cm[2,1])
+  return(precision)
+})
+
+#Calculamos la media aritmética de k iteraciones
+precisionNaiveBayes <- mean(as.numeric(cvNaiveBayes))
+print(sprintf("La precisión para NaiveBayes en Cross Validation: %.4f %%",100*precisionNaiveBayes))
+```
+
+```{r}
+vectorMedia = c(precisionC50ArbolClasificacion*100,precisionRegresionLogistica*100,precisionNaiveBayes*100)
+vectorError = c(100-precisionC50ArbolClasificacion*100,100-precisionRegresionLogistica*100,100-precisionNaiveBayes*100)
+vectorVarianza = c(var(as.numeric(cvC50ArbolClasificacion)*100), var(as.numeric(cvRegresionLogistica)*100), var(as.numeric(cvNaiveBayes)*100))
+vectorDesviacion = c(sd(as.numeric(cvC50ArbolClasificacion)*100), sd(as.numeric(cvRegresionLogistica)*100), sd(as.numeric(cvNaiveBayes)*100))
+M1 = cbind(c("Árbol Clasificacion", "Regresion Logistica","Naive Bayes"),vectorMedia,vectorError, vectorVarianza,vectorDesviacion)
+colnames(M1) <- c("Modelo", "Porcentaje Predicción", "Error", "Varianza", "Desviación")
+# Ordenamos y mostramos los resultados
+M1[order(M1[,"Porcentaje Predicción"],decreasing = TRUE), ] 
+```
+
+Como podemos observar, ha aumentado levemente la precisión en la predicción al eliminar la variable slope, aunque la desviación estandar también aumento levemente, por lo que no podemos considerar relevante la eliminación de la variable en nuestros modelos predicctivos.
 
 
 ## Representación de los resultados a partir de tablas y gráficas. 
