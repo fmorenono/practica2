@@ -443,7 +443,10 @@ cor(diseases$slope, diseases$ca) # correlación entre slope y ca
 
 Como podemos observar, existe una correlación negativa moderada -0.537684, entre las variables oldpeak y slope, ésta no es muy alta pero se realizarán las pruebas cuando generemos los modelos predictivos, considerando las dos y luego solo una de ellas para ver si mejora el porcentaje de predicción.
 
+
 ```{r}
+
+
 if(!require(PerformanceAnalytics)){
   install.packages('PerformanceAnalytics', repos='http://cran.us.r-project.org')
   library(PerformanceAnalytics)
@@ -452,6 +455,58 @@ dat1 <- data.frame(diseases$oldpeak, diseases$slope)
 chart.Correlation(dat1) # graficamos la correlación 
 ```
 
+
+
+Realizado este estudio, vamos a realizar análisis ANOVA para ver si se encuentran diferencias significativas entre las media del valor de trestbps (presión arterial en reposo) y otras variables entre los diferentes grupos de edad. Este estudio nos puede permitir permitir ver las caracteríscas de las variables y quizá sacar alguna conclusión de prioridad de variables a incluir en algun model que queramos estudiar.
+
+```{r}
+
+
+
+anova=aov(diseases$trestbps ~ diseases$age.tipo)
+summary (anova)
+
+```
+
+Vemos que al ser  p-value es inferior a 0.05 sí que hay evidencias suficientes para considerar que al menos dos medias son distintas. No obstante vamos a probar si se cumplen las condiciones para aplicar ANOVA. Revisamos los siguientes gráficos.
+
+```{r}
+plot( anova)
+
+```
+
+En el gráfico 1, la representación gráfica de los residuos nos muestra falta de homocedasticidad  y en el gráfico 2  qqplot vemos que los residuos no se distribuyen  cercanos a la linea de la normal. Decidimos aplicar un estudio no paramétrico.
+
+
+```{r}
+diseases$age.tipo <- as.factor(diseases$age.tipo)
+kruskal.test(trestbps ~ age.tipo, data = diseases)
+
+pairwise.wilcox.test(x = diseases$trestbps, g = diseases$age.tipo, p.adjust.method = "holm" )
+
+
+```
+También este estudio (test de Kruskal) nos dice que existe diferencias significativas, pero no entre todos los gupos de edad como nos indica el segundo test pairwise.wilcox.
+
+
+
+Repetimos este estudio para otras variables:
+
+```{r}
+kruskal.test(thalach ~ age.tipo, data = diseases)
+
+pairwise.wilcox.test(x = diseases$thalach, g = diseases$age.tipo, p.adjust.method = "holm" )
+
+
+kruskal.test(oldpeak ~ age.tipo, data = diseases)
+
+pairwise.wilcox.test(x = diseases$oldpeak, g = diseases$age.tipo, p.adjust.method = "holm" )
+
+```
+En el caso de thalach (maximo ritmo cardiaco alcanzado) vemos que practicamente entre todos los grupos de edad las medias son significativamente distintas. 
+El resultado para oldpeak (depresión del ST inducida por el ejercicio en relación con el descanso) es más parecido a la variable trestbps (hay diferencia entre los diferentes grupos pero no entre todos entre ellos).
+
+Las conclusiones eran previsibles, los diferentes grupos de edad tienen medias de trestbps, thalch y oldpeak significativamente distintas (entre algunos grupos entre ellos). Sobre todo en thalch vemos medias diferentes practicamente entre todos los grupos. De momento no profundizamos más en este estudio y lo retomaremos si por los modelos que realicemos nos interesa profundizar en el análisis.
 
 ******
 # Análisis y pruebas estadísticas
@@ -468,7 +523,7 @@ str(diseases)
 
 ### Comprobación de la normalidad y homogeneidad de la varianza. 
 
-Vamos a probar la normalalidad de los datos mediante el test Shapiro–Wilk. seleccionamos las variables a las que aplica comprobar la normalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a intuir su distribución.
+Vamos a probar la normalidad de los datos mediante el test Shapiro–Wilk. Seleccionamos las variables a las que aplica comprobar la normalidad, que son las variables cuantitativas. Visualizamos unos gráficos en columna, que nos ayudará a intuir su distribución.
 
 ```{r}
 
@@ -476,11 +531,6 @@ trestbps<-diseases$trestbps
 chol<-diseases$chol
 thalach<-diseases$thalach
 oldpeak<-diseases$oldpeak
-
-
-
-
-
 hist(trestbps,main = "Histograma variable trestbps",ylab=names("trestbps"),col=heat.colors(8))
 hist(chol,main = "Histograma variable chol",ylab=names("chol"),col=heat.colors(8))
 hist(thalach,main = "Histograma variable thalach",ylab=names("thalach"),col=heat.colors(8))
@@ -503,7 +553,7 @@ shapiro.test(oldpeak)
 
 
 ```
-Respecto a todas la variables, exceptuando la variable chol, los valores del pvalue son muy pequeños y podemos determinar que no tienen una distribución normal (se rechaza la hipótesis nula y por lo tanto asumimos que no hay normalidad en los datos). La variable chol si podemos considerar que tiene distribución normal (pvalue=0.1734>0.05). Si vemos el gráfico de esa variable podemos ver esa característica.
+Respecto a todas la variables, exceptuando la variable chol, los valores del pvalue son muy pequeños y podemos determinar que no tienen una distribución normal (se rechaza la hipótesis nula y por lo tanto asumimos que no hay normalidad en los datos). La variable chol sí podemos considerar que tiene distribución normal (pvalue=0.1734>0.05). Si vemos el gráfico de esa variable podemos ver esa característica.
 
 
 A continuación trataremos el análisis de la varianza.
@@ -519,7 +569,7 @@ fligner.test(chol ~ sex, data = diseases)
 ```
 Al ser p-value mayor al nivel de significación 0.05 podemos concluir que hay diferencias significativas entre las varianzas.
 
-Ahora repetimos la prueba para las variabels trestbps,thalach y oldpeak y siendo la varaible dependiente tambien el sexo.
+Ahora repetimos la prueba para las variabels trestbps,thalach y oldpeak y siendo la variable dependiente tambien el sexo.
 
 
 
@@ -844,9 +894,16 @@ El código lo pueden encontrar en https://github.com/fmorenono/practica2
 
 ## Referencias
 
-El Data Set seleccionado está disponible en :
+Referenciamos a continuación fuetes de información utilizado durante la realización de la práctica.
+
+-El Data Set seleccionado está disponible en:
 https://www.kaggle.com/ronitf/heart-disease-uci
 
+-Estudio ANOVA:
+https://rpubs.com/Joaquin_AR/219148
+
+-Test de Kruskal-Wallis:
+https://rpubs.com/Joaquin_AR/219504
 
 <br>
 <br>
